@@ -21,22 +21,22 @@ qnd_kubed with options will:
 *If a cluster with the same name already exists, you will be asked if you want to deploy Hello World onto it.*
 
 ```
-curl https://raw.githubusercontent.com/nocyber/qnd_kubed/main/qnd_kubed > qnd_kubed  # Download
-chmod +x ./qnd_kubed                                                                 # make executable
+curl https://raw.githubusercontent.com/nocyber/qnd_kubed/main/qnd_kubed > qnd_kubed # Download
+chmod +x ./qnd_kubed                                                                # make executable
 ```
 
 ## Usage
 ```
-./qnd_kubed                         # execute with defaults.
-./qnd_kubed -a "myapp" -K           # execute, name the Hello World app[-a], install Keycloak container[-K]
-./qnd_kubed -c "vmgroup" -C         # name the cluster[-c], install only a cluster[-C] and exit
+./qnd_kubed                   # execute with defaults.
+./qnd_kubed -a "myapp" -K     # execute, name the Hello World app[-a], install Keycloak container[-K]
+./qnd_kubed -c "vmgroup" -C   # name the cluster[-c], install only a cluster[-C] and exit
 ```
 
 ```
-./qnd_kubed -h                      # Help screen and examples
-./qnd_kubed -V                      # Show default variables
-./qnd_kubed -s                      # Show status
-./qnd_kubed -S                      # Show status (expanded)
+./qnd_kubed -h                # Help screen and examples
+./qnd_kubed -V                # Show default variables
+./qnd_kubed -s                # Show status
+./qnd_kubed -S                # Show status (expanded)
 ```
 
 
