@@ -43,7 +43,7 @@ export DEF_KC_EXT_PORT='8080'
     echo -e "Container API already enabled."
 
 #### 2-3) Create cluster, get credentials, if necessary.
-gcloud container clusters create "${DEF_CLUSTER}" --machine-type ${DEF_MACHINE} --disk-size ${DEF_HD_SIZE} --zone ${DEF_ZONE}
+gcloud container clusters create ${DEF_CLUSTER} --machine-type ${DEF_MACHINE} --disk-size ${DEF_HD_SIZE} --zone ${DEF_ZONE}
 gcloud container clusters get-credentials ${DEF_CLUSTER} --zone ${DEF_ZONE}
 
 #### 4-6) Create & scale deployment, create load balancer.
