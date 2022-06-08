@@ -1,7 +1,7 @@
 # Quick n Dirty: Kubed
 
 #### qnd_kubed quickly sets up kubernetes clusters for testing, research and learning purposes.
-The script originally was part of a series of [manual](#Manual) lists of commands to copy into the shell. It was designed to be quick, but polluted the shell history with excessive commenting.
+The script originally was part of a series of [manual](#Manual-deployment) lists of commands to copy into the shell. It was designed to be quick, but polluted the shell history with excessive commenting.
 
 qnd_kubed without any options will:
   1. create a zonal cluster (and tell you the duration of time it took).
@@ -86,11 +86,12 @@ Please make sure to update tests as appropriate.
 
 ---
 ---
+  
 # Manual deployment
 * [Variables](#Variables)
-* [gcloud commands (Cluster & Hello App container)](#gcloud)
-* [yaml deployment (Keycloak container)](#deploy)
-* [yaml reference files for Keycloak installation](reference)
+* [gcloud & kubectl commands (Cluster & Hello App container)](#gcloud-&-kubectl-deployment-commands)
+* [yaml deployment (Keycloak container)](#deploy-Keycloak-container-manually)
+* [yaml reference files for Keycloak installation](#reference-files-for-yaml-Keycloak-deployment)
 
 ## Variables
 This script is based on the following variables and commands, which can be applied directly to the terminal.
