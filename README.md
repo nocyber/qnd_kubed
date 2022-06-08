@@ -57,8 +57,8 @@ chmod +x ./qnd_kubed
 #     and output the Keycloak yaml deployment files[-Y] to the current directory.
 ./qnd_kubed -a "test-app" -e 1234 -K -k 5678 -Y
 
-#  Launch a regional cluster in us-east1, do not deploy anything.
-./qnd_kubed -C -z us-east1
+#  Launch a regional[-z] cluster in us-east1, (do not deploy anything[-C]).
+./qnd_kubed -z us-east1 -C
 
 #  Launch a regional cluster in us-central1, call the app[-a] "test-app",
 #  deploy Hello World on external[-e] port 2222.
@@ -68,7 +68,7 @@ chmod +x ./qnd_kubed
 #  Launch a zonal cluster in zone[-z] us-west2-a, call the app[-a] "test-app",
 #  tag the deployment name with version[-v] "v2", deploy 6 replicas[-r] of Hello World on external[-e] port 1234.
 #  Also, and install Keycloak[-K] container and make it accessible on port 5678[-k].
-./qnd_kubed -z us-west2-a -a "myapp" -v 2 -r 6 -e 1234 -K -k 5678
+./qnd_kubed -z us-west2-a -a "test-app" -v v2 -r 6 -e 1234 -K -k 5678
 
 # Output the default Keycloak yaml deployment files only.
 ./qnd_kubed -W
