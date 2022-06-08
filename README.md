@@ -89,7 +89,7 @@ Please make sure to update tests as appropriate.
   
 # Manual deployment
 * [Variables](#Variables)
-* [gcloud & kubectl commands (Cluster & Hello App container)](#gcloud-&-kubectl-deployment-commands)
+* [gcloud & kubectl commands (Cluster & Hello App container)](#gcloud-and-kubectl-deployment-commands)
 * [yaml deployment (Keycloak container)](#deploy-Keycloak-container-manually)
 * [yaml reference files for Keycloak installation](#reference-files-for-yaml-Keycloak-deployment)
 
@@ -114,7 +114,7 @@ export DEF_KC_EXT_PORT='8080'
 ```
 
 
-## gcloud & kubectl deployment commands
+## gcloud and kubectl deployment commands
 #### 1-6) Check API, create cluster, deploy Kubernetes.
 
 
