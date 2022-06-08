@@ -1,7 +1,7 @@
 # Manual Quick 'n Dirty: Kubed
  - cluster and app deployment
 
-Table of Contents:
+## Table of Contents:
 * [Variables](#Variables)
 * [gcloud & kubectl commands (Cluster & Hello App container)](#gcloud-and-kubectl-deployment-commands)
 * [yaml deployment (Keycloak container)](#deploy-Keycloak-container-manually)
@@ -55,17 +55,17 @@ kubectl expose deployment ${DEF_DEPLOYMENT} --name=${DEF_SERVICE} \
 
 #### 7-9) Check Hello World app on Kubernetes cluster
 ```
-kubectl get services                                                            # Wait for external IP
-LB_IP=$(kubectl get services | grep "${DEF_SERVICE}" | awk '{ print $4 }')      # Fetch IP
-curl -m1 http://${LB_IP}:${DEF_EXT_PORT}                                        # curl IP & port with a 1 second timeout
+kubectl get services                                                       # Wait for external IP
+LB_IP=$(kubectl get services | grep "${DEF_SERVICE}" | awk '{ print $4 }') # Fetch IP
+curl -m1 http://${LB_IP}:${DEF_EXT_PORT}                                   # curl IP & port with a 1 second timeout
 ```
 
 #### Optional) Deploy Keycloak app, load balancer, then route.
 see [deploy Keycloak container manually](#deploy-Keycloak-container-manually)
 ```
-kubectl apply -f keycloak_app_service.yaml                                      # deploy app and load balancer
-kubectl get services                                                            # fetch IP and add it to keycloak_ingress.yaml 
-kubectl apply -f keycloak_ingress.yaml                                          # create ingress
+kubectl apply -f keycloak_app_service.yaml                                 # deploy app and load balancer
+kubectl get services                                                       # fetch IP and add it to keycloak_ingress.yaml 
+kubectl apply -f keycloak_ingress.yaml                                     # create ingress
 ```
 
 #### 10-14) Delete Kubernetes cluster
