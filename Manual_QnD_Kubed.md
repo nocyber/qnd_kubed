@@ -1,6 +1,7 @@
 # Manual Quick 'n Dirty: Kubed
  - cluster and app deployment
- - 
+
+Table of Contents:
 * [Variables](#Variables)
 * [gcloud & kubectl commands (Cluster & Hello App container)](#gcloud-and-kubectl-deployment-commands)
 * [yaml deployment (Keycloak container)](#deploy-Keycloak-container-manually)
