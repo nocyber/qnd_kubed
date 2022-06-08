@@ -1,4 +1,4 @@
-# Quick n Dirty: Kubed
+# Quick 'n Dirty: Kubed
 
 #### qnd_kubed quickly sets up kubernetes clusters for testing, research and learning purposes.
 The script originally was part of a series of [manual](#Manual-deployment) lists of commands to copy into the shell. It was designed to be quick, but polluted the shell history with excessive commenting.
@@ -147,10 +147,11 @@ curl -m1 http://${LB_IP}:${DEF_EXT_PORT}                                        
 ```
 
 #### Optional) Deploy Keycloak app, load balancer, then route.
-see [Keycloak yaml files for reference](#reference)
+see [deploy Keycloak container manually](#deploy-Keycloak-container-manually)
 ```
-kubectl apply -f keycloak_app_service.yaml                                      # yaml file is inside script
-kubectl apply -f keycloak_ingress.yaml                                          # generate both yaml files: ./qnd_kubed -Y
+kubectl apply -f keycloak_app_service.yaml                                      # deploy app and load balancer
+kubectl get services                                                            # fetch IP and add it to keycloak_ingress.yaml 
+kubectl apply -f keycloak_ingress.yaml                                          # create ingress
 ```
 
 #### 10-14) Delete Kubernetes cluster
@@ -204,8 +205,10 @@ kubectl apply -f keycloak_ingress.yaml
 ```
 
 #### Go to website
+```
 echo "http://${DEF_KEYCLOAK_IP}:${DEF_KC_EXT_PORT}"
-
+```
+  
 ---
 
 ## reference files for yaml Keycloak deployment:
