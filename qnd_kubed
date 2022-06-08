@@ -149,7 +149,7 @@ print_variables (){
 ## print_kube_status short       # gives a shorter version.
 print_kube_status () {
     echo -e "\n${STATUS_SCREEN_COLOR}====================================================="
-    echo -e "${BLINK}STATUS:${STATUS_SCREEN_COLOR} $0 -S${WHITE}"
+    echo -e "${BLINK}STATUS:${STATUS_SCREEN_COLOR} $0 [-s or -S] ${WHITE}"
     echo -e "${STATUS_SCREEN_COLOR}cluster: ${WARN}${DEF_CLUSTER}${WHITE}"
     [ ! "${1}" == "short" ] && GCIL="$(gcloud compute instances list | grep gke | head -n 16)"
     GCCL="$(gcloud container clusters list)"
@@ -546,7 +546,7 @@ spec:
 install_keycloak (){
   echo -e "${MESSAGE_BAR}-------------${WHITE}"
   echo -e "Installing Keycloak....."
-  echo -e "${COMMANDS_COLOR}# 9) kubectl apply -f ${KEYCLOAK_APP_SERVICE_FILENAME}${WHITE}"
+  echo -e "${COMMANDS_COLOR}kubectl apply -f ${KEYCLOAK_APP_SERVICE_FILENAME}${WHITE}"
   load_keycloak_app_service
   cat <<EOF | kubectl apply -f -
 $KEYCLOAK_APP_SERVICE
@@ -564,7 +564,7 @@ EOF
   done
 
 
-  echo -e "${COMMANDS_COLOR}# 10) kubectl apply -f ${KEYCLOAK_INGRESS_FILENAME}${WHITE}"
+  echo -e "${COMMANDS_COLOR}kubectl apply -f ${KEYCLOAK_INGRESS_FILENAME}${WHITE}"
   load_keycloak_ingress
   cat <<EOF | kubectl apply -f -
 $KEYCLOAK_INGRESS
