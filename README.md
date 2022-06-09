@@ -17,8 +17,8 @@ qnd_kubed with options will:
   - for more: `./qnd_kubed -h`
 
 ## Installation
-*Make sure you are logged in (gcloud auth login), and you have set your project (gcloud config set project <project>)*
-*If a cluster with the same name already exists, you will be asked if you want to deploy Hello World onto it.*
+Make sure you are logged in (gcloud auth login), and you have set your project (gcloud config set project <project>)
+If a cluster with the same name already exists, you will be asked if you want to deploy Hello World onto it.
 
 ##### Download & make executable:
 ```
@@ -39,10 +39,12 @@ chmod +x ./qnd_kubed
 ./qnd_kubed -s                 # Show status
 ./qnd_kubed -S                 # Show status (expanded)
 ```
-
-
-## Usage examples with options:
   
+---
+
+## Notes and Usage examples:
+
+##### Naming
 By default, names are based on the app name [-a <name>] to be easy to identify.
 For example, if you call the app: [-a canoe], you can expect these names:
  - cluster name: "canoe-cluster"
@@ -51,7 +53,16 @@ For example, if you call the app: [-a canoe], you can expect these names:
 
 The cluster name[-c] and deployment version ids[-v] can be changed independently.
 
-Example 1:
+##### Redeploying
+You can delete containers and redeploy them on top of the same cluster with the original command you used.*
+```
+(kubectl get deployments)
+(kubectl delete deployment <deplyment name>)
+```
+
+
+  
+##### Example 1:
 - Name the cluster "[default app name]-cluster".
 - Launch a zonal cluster in the [default] zone, 
 - Name your Hello World container: [default app name]
@@ -62,7 +73,7 @@ Example 1:
 ./qnd_kubed
 ```
 
-Example 2:
+##### Example 2:
 - Name the cluster "test-app-cluster".
 - Launch a zonal cluster in the [default] zone, 
 - Name your Hello World container: [-a] "test-app"
@@ -73,7 +84,7 @@ Example 2:
 ./qnd_kubed -a "test-app" -K
 ```
 
-Example 3:
+##### Example 3:
 - Name the cluster "cluterz".
 - Launch a zonal cluster in the [default] zone, 
 - Name your Hello World container: [-a] "test-app"
@@ -85,7 +96,7 @@ Example 3:
 ./qnd_kubed -c "cluterz" -a "test-app" -e 1234 -K -k 5678 -Y
 ```
 
-Example 4:
+##### Example 4:
 - Name the cluster: [-c] "cluterz".
 - Launch a regional cluster in region: [-z] us-east1
 - Cluster only[-C], no deployments.
@@ -94,7 +105,7 @@ Example 4:
 ./qnd_kubed -c "cluterz" -z us-east1 -C
 ```
 
-Example 5:
+##### Example 5:
 - Name the cluster: [-c] "test-app-cluster".
 - Launch a regional cluster in region: [-z] us-central1
 - Name your Hello World container: [-a] "test-app"
@@ -105,7 +116,7 @@ Example 5:
 ./qnd_kubed -z us-central1 -a "test-app" -e 2222 -A '--cpu-percent=80 --min=2 --max=6'
 ```
 
-Example 6:
+##### Example 6:
 - Name the cluster "test-app-cluster".
 - Launch a zonal cluster in zone: [-z] us-west2-a
 - Name your Hello World container: [-a] "test-app"
@@ -118,17 +129,14 @@ Example 6:
 ./qnd_kubed -z us-west2-a -a "test-app" -v v2 -r 6 -e 1234 -K -k 5678
 ```
 
-Example 7:
+##### Example 7:
 - Output the default Keycloak yaml deployment files only.
 
 ```
 ./qnd_kubed -W
 ```
-
-*You can delete containers *
-*and redeploy them on top of the same cluster with the original command you used.*
-(kubectl get deployments)
-(kubectl delete deployment <deplyment name>)
+  
+---
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
