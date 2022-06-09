@@ -28,9 +28,9 @@ chmod +x ./qnd_kubed
 
 ## Usage
 ```
-./qnd_kubed                    # execute with defaults.
-./qnd_kubed -a "myapp" -K      # execute, name the Hello World app[-a], install Keycloak[-K]
-./qnd_kubed -c "vmgroup" -C    # name the cluster[-c], install only a cluster[-C] and exit
+./qnd_kubed                     # execute with defaults.
+./qnd_kubed -a "teacup" -K      # name the app[-a] "teacup", install Keycloak[-K]
+./qnd_kubed -c "qacluster" -C   # name the cluster[-c] "qacluster", install only a cluster[-C] and exit
 ```
 
 ```
@@ -42,37 +42,89 @@ chmod +x ./qnd_kubed
 
 
 ## Usage examples with options:
+  
+By default, names are based on the app name [-a <name>] to be easy to identify.
+For example, if you call the app: [-a canoe], you can expect these names:
+ - cluster name: "canoe-cluster"
+ - deployment name: "canoe-v1-deploy"
+ - load-balancer: "canoe-lb-service"
+
+The cluster name[-c] and deployment version ids[-v] can be changed independently.
+
+Example 1:
+- Name the cluster "[default app name]-cluster".
+- Launch a zonal cluster in the [default] zone, 
+- Name your Hello World container: [default app name]
+- Use external port: [default port 80]
+- (Check default variables with ./qnd_kubed -V)
+
 ```
-#  Launch a zonal cluster in the default script zone, name it <app name>-cluster.
-#  Give the Hello World app the default <app name>. Use default external port 80
-#  (Check default variables with ./qnd_kubed -V)
 ./qnd_kubed
+```
 
-#  Launch a zonal cluster, deploy Hello World (default on port 80) and name it[-a] test-app.
-#  Also install Keycloak container[-K] (default external port 8080).
+Example 2:
+- Name the cluster "test-app-cluster".
+- Launch a zonal cluster in the [default] zone, 
+- Name your Hello World container: [-a] "test-app"
+- Use external port: [default port 80]
+- Install Keycloak container also, on external port: [default 8080]
+
+```
 ./qnd_kubed -a "test-app" -K
+```
 
-#  Launch a zonal cluster, call the app[-a] "test-app", deploy Hello World on external[-e] port 1234.
-#  Also install Keycloak[-K] container on external Keycloak[-k] port 5678.
-#     and output the Keycloak yaml deployment files[-Y] to the current directory.
-./qnd_kubed -a "test-app" -e 1234 -K -k 5678 -Y
+Example 3:
+- Name the cluster "cluterz".
+- Launch a zonal cluster in the [default] zone, 
+- Name your Hello World container: [-a] "test-app"
+- Use external port: [-e] 1234
+- Install Keycloak[-K] container also, on external port: [-k] 5678
+- Create Keycloak yaml[-Y] deployment files in current directory.
 
-#  Launch a regional[-z] cluster in us-east1, (do not deploy anything[-C]).
-./qnd_kubed -z us-east1 -C
+```
+./qnd_kubed -c "cluterz" -a "test-app" -e 1234 -K -k 5678 -Y
+```
 
-#  Launch a regional cluster in us-central1, call the app[-a] "test-app",
-#  deploy Hello World on external[-e] port 2222.
-#  Also, enable and configure autoscaling[-A].
+Example 4:
+- Name the cluster: [-c] "cluterz".
+- Launch a regional cluster in region: [-z] us-east1
+- Cluster only[-C], no deployments.
+
+```
+./qnd_kubed -c "cluterz" -z us-east1 -C
+```
+
+Example 5:
+- Name the cluster: [-c] "test-app-cluster".
+- Launch a regional cluster in region: [-z] us-central1
+- Name your Hello World container: [-a] "test-app"
+- Use external port: [-e] 2222
+- Enable autoscaling and configure: [-A] '--cpu-percent=80 --min=2 --max=6'
+
+```
 ./qnd_kubed -z us-central1 -a "test-app" -e 2222 -A '--cpu-percent=80 --min=2 --max=6'
+```
 
-#  Launch a zonal cluster in zone[-z] us-west2-a, call the app[-a] "test-app",
-#  tag the deployment name with version[-v] "v2", deploy 6 replicas[-r] of Hello World on external[-e] port 1234.
-#  Also, and install Keycloak[-K] container and make it accessible on port 5678[-k].
+Example 6:
+- Name the cluster "test-app-cluster".
+- Launch a zonal cluster in zone: [-z] us-west2-a
+- Name your Hello World container: [-a] "test-app"
+- Tag the deployment name with a different version:[-v] "v2"
+- Deploy 6 replicas: [-r] 6
+- Use external port: [-e] 1234
+- Install Keycloak[-K] container also, on external port: [-k] 5678
+
+```
 ./qnd_kubed -z us-west2-a -a "test-app" -v v2 -r 6 -e 1234 -K -k 5678
+```
 
-# Output the default Keycloak yaml deployment files only.
+Example 7:
+- Output the default Keycloak yaml deployment files only.
+
+```
 ./qnd_kubed -W
 ```
+
 *You can delete containers *
 *and redeploy them on top of the same cluster with the original command you used.*
 (kubectl get deployments)
