@@ -18,7 +18,6 @@ qnd_kubed with options will:
 
 ## Installation
 Make sure you are logged in (gcloud auth login), and you have set your project (gcloud config set project <project>)
-If a cluster with the same name already exists, you will be asked if you want to deploy Hello World onto it.
 
 ##### Download & make executable:
 ```
@@ -39,10 +38,8 @@ chmod +x ./qnd_kubed
 ./qnd_kubed -s                 # Show status
 ./qnd_kubed -S                 # Show status (expanded)
 ```
-  
----
 
-## Notes and Usage examples:
+## Notes
 
 ##### Naming
 By default, names are based on the app name [-a <name>] to be easy to identify.
@@ -54,13 +51,16 @@ For example, if you call the app: [-a canoe], you can expect these names:
 The cluster name[-c] and deployment version ids[-v] can be changed independently.
 
 ##### Redeploying
-You can delete containers and redeploy them on top of the same cluster with the original command you used.*
+
+You can delete containers and redeploy them on top of the same cluster with the original command you used.
 ```
 (kubectl get deployments)
 (kubectl delete deployment <deplyment name>)
 ```
 
-
+---
+  
+## Usage examples:
   
 ##### Example 1:
 - Name the cluster "[default app name]-cluster".
