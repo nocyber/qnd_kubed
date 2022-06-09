@@ -111,7 +111,7 @@ Check ingress file:
 cat ./keycloak_ingress.yaml
 ```
 
-Edit the file to insert IP by replacing "<LB service IP>"
+Edit the file to insert IP by replacing "\<LB service IP\>",
 or use this sed command to do it for you:
 ```
 sed -i 's/<LB service IP>/${DEF_KEYCLOAK_IP}/g' ./keycloak_ingress.yaml
