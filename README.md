@@ -55,7 +55,7 @@ The cluster name[-c] and deployment version ids[-v] can be changed independently
 You can delete containers and redeploy them on top of the same cluster with the original command you used.
 ```
 (kubectl get deployments)
-(kubectl delete deployment <deplyment name>)
+(kubectl delete deployment <deployment name>)
 ```
 
 ---
