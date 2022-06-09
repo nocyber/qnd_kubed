@@ -99,12 +99,21 @@ kubectl apply -f keycloak_app_service.yaml
 ```
 
 #### Configure ingress file
-```
-# Copy the keycloak load-balancer external IP to variable
-kubectl get services
-export DEF_KEYCLOAK_IP=<10.10.10.10>
 
-# edit the file to insert IP by replacing "<LB service IP>"
+Copy the keycloak load-balancer external IP to variable
+```
+kubectl get services
+export DEF_KEYCLOAK_IP="<INSERT THE IP HERE>"
+```
+
+Check ingress file:
+```
+cat ./keycloak_ingress.yaml
+```
+
+Edit the file to insert IP by replacing "<LB service IP>"
+or use this sed command to do it for you:
+```
 sed -i 's/<LB service IP>/${DEF_KEYCLOAK_IP}/g' ./keycloak_ingress.yaml
 ```
 
