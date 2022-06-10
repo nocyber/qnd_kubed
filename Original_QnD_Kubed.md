@@ -1,11 +1,10 @@
-# Manual Quick 'n Dirty: Kubed
+# Original Quick 'n Dirty: Kubed
  - cluster and app deployment
 
 ## Table of Contents:
 * [Variables](#Variables)
 * [gcloud & kubectl commands (Cluster & Hello App container)](#gcloud-and-kubectl-deployment-commands)
-* [yaml deployment (Keycloak container)](#deploy-Keycloak-container-manually)
-* [yaml reference files for Keycloak installation](#reference-files-for-yaml-Keycloak-deployment)
+* [Keycloak deployment Readme](Keycloak_files/Keycloak_deployment.md)
 
 ## Variables
 This script is based on the following variables and commands, which can be applied directly to the terminal.
@@ -61,10 +60,10 @@ curl -m1 http://${LB_IP}:${DEF_EXT_PORT}                                   # cur
 ```
 
 #### Optional) Deploy Keycloak app, load balancer, then route.
-see [deploy Keycloak container manually](#deploy-Keycloak-container-manually)
+see: [Keycloak deployment Readme](Keycloak_files/Keycloak_deployment.md) for details.
 ```
 kubectl apply -f keycloak_app_service.yaml                                 # deploy app and load balancer
-kubectl get services                                                       # fetch IP and add it to keycloak_ingress.yaml 
+kubectl get services                                                       # fetch IP and add it to keycloak_ingress.yaml
 kubectl apply -f keycloak_ingress.yaml                                     # create ingress
 ```
 
@@ -77,143 +76,3 @@ gcloud container clusters delete ${DEF_CLUSTER} --zone ${DEF_ZONE}
 ```
 
 ---
-
-
-## deploy Keycloak container manually
-To deploy Keycloak manually:
-
-#### Generate yaml files and connect to cluster, if not connected:
-```
-./qnd_kubed -W
-gcloud container clusters get-credentials ${DEF_CLUSTER} --zone ${DEF_ZONE}
-```
-
-#### Deploy app and load balancer
-```
-kubectl apply -f keycloak_app_service.yaml
-```
-
-- ##### Or deploy app and load-balancer with qnd_kubed:
-```
-./qnd_kubed -y keycloak_app_service.yaml
-```
-
-#### Configure ingress file
-
-Copy the keycloak load-balancer external IP to variable
-```
-kubectl get services
-export DEF_KEYCLOAK_IP="<INSERT THE IP HERE>"
-```
-
-Check ingress file:
-```
-cat ./keycloak_ingress.yaml
-```
-
-Edit the file to insert IP by replacing "\<LB service IP\>",
-or use this sed command to do it for you:
-```
-sed -i 's/<LB service IP>/${DEF_KEYCLOAK_IP}/g' ./keycloak_ingress.yaml
-```
-
-#### Deploy ingress yaml.
-```
-kubectl apply -f keycloak_ingress.yaml
-```
-
-- #### Or deploy ingress with qnd_kubed:
-```
-./qnd_kubed -y keycloak_ingress.yaml
-```
-
-#### Go to website
-```
-echo "http://${DEF_KEYCLOAK_IP}:${DEF_KC_EXT_PORT}"
-```
-  
----
-
-## reference files for yaml Keycloak deployment:
-
-cat ./keycloak_app_service.yaml
-```
-apiVersion: v1
-kind: Service
-metadata:
-  name: keycloak
-  labels:
-    app: keycloak
-spec:
-  ports:
-  - name: http
-    port: 8080
-    targetPort: 8080
-  selector:
-    app: keycloak
-  type: LoadBalancer
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: keycloak
-  labels:
-    app: keycloak
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: keycloak
-  template:
-    metadata:
-      labels:
-        app: keycloak
-    spec:
-      containers:
-      - name: keycloak
-        image: quay.io/keycloak/keycloak:18.0.0
-        args:
-        - "start-dev"
-        env:
-        - name: KEYCLOAK_ADMIN
-          value: "admin"
-        - name: KEYCLOAK_ADMIN_PASSWORD
-          value: "admin"
-        - name: KC_PROXY
-          value: "edge"
-        ports:
-        - name: http
-          containerPort: 8080
-        readinessProbe:
-          httpGet:
-            path: /realms/master
-            port: 8080
-      initContainers:
-      - name: init-myservice
-        image: busybox:1.28
-        command: ['sh', '-c', "echo 'This is the init container'; sleep 10"]
-```
-
-
-cat ./keycloak_ingress.yaml
-```
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: keycloak
-spec:
-  tls:
-    - hosts:
-      - keycloak.<IP>.nip.io
-  rules:
-  - host: keycloak.<IP>.nip.io
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: keycloak
-            port:
-              number: 8080
-```

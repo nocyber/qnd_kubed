@@ -1,7 +1,7 @@
 # Quick 'n Dirty: Kubed
 
-#### qnd_kubed quickly sets up kubernetes clusters for testing, research and learning purposes.
-The script originally was part of a series of [manual](https://github.com/nocyber/qnd_kubed/blob/main/Manual_QnD_Kubed.md) lists of commands to copy into the shell. It was designed to be quick, but polluted the shell history with excessive commenting.
+#### qnd_kubed quickly sets up Kubernetes clusters for testing, research and learning purposes.
+The script originally was part of a series of [manual lists of commands](Original_QnD_Kubed.md) made to copy into the shell. It was designed to be quick, but polluted the shell history with excessive commenting.
 
 qnd_kubed without any options will:
   1. create a zonal cluster (and tell you the duration of time it took).
@@ -29,8 +29,8 @@ chmod +x ./qnd_kubed
 ```
 ./qnd_kubed                     # execute with defaults.
 ./qnd_kubed -a "teacup" -K      # name the app[-a] "teacup", install Keycloak[-K]
-./qnd_kubed -c "qacluster" -C   # name the cluster[-c] "qacluster", install only a cluster[-C] and exit
 ```
+***( Keycloak user: admin, password: admin)***
 
 ```
 ./qnd_kubed -h                 # Help screen and examples
@@ -59,12 +59,12 @@ You can delete containers and redeploy them on top of the same cluster with the 
 ```
 
 ---
-  
+
 ## Usage examples:
-  
+
 ##### Example 1:
 - Name the cluster "[default app name]-cluster".
-- Launch a zonal cluster in the [default] zone, 
+- Launch a zonal cluster in the [default] zone,
 - Name your Hello World container: [default app name]
 - Use external port: [default port 80]
 - (Check default variables with ./qnd_kubed -V)
@@ -75,7 +75,7 @@ You can delete containers and redeploy them on top of the same cluster with the 
 
 ##### Example 2:
 - Name the cluster "test-app-cluster".
-- Launch a zonal cluster in the [default] zone, 
+- Launch a zonal cluster in the [default] zone,
 - Name your Hello World container: [-a] "test-app"
 - Use external port: [default port 80]
 - Install Keycloak container also, on external port: [default 8080]
@@ -86,7 +86,7 @@ You can delete containers and redeploy them on top of the same cluster with the 
 
 ##### Example 3:
 - Name the cluster "cluterz".
-- Launch a zonal cluster in the [default] zone, 
+- Launch a zonal cluster in the [default] zone,
 - Name your Hello World container: [-a] "test-app"
 - Use external port: [-e] 1234
 - Install Keycloak[-K] container also, on external port: [-k] 5678
@@ -135,7 +135,7 @@ You can delete containers and redeploy them on top of the same cluster with the 
 ```
 ./qnd_kubed -W
 ```
-  
+
 ---
 
 ## Contributing

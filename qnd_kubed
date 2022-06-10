@@ -3,7 +3,7 @@
 #######################################################################################
 #######################################################################################
 # Quick 'n Dirty Kubed
-qnd_kubed_VERSION='0.8'
+qnd_kubed_VERSION='0.81'
 #
 # @ author: Daniel Lagacé
 # @ Date: July 8th 2022
@@ -41,31 +41,31 @@ qnd_kubed_VERSION='0.8'
 ## ==> VARIABLES
 
 #PROJECT_ID='<INSERT-PROJECT-ID>'       # for future use
-DEF_ZONE="us-east1-b"
-DEF_VERSION="v1"
-DEF_APP="myapp"
-DEF_CLUSTER="${DEF_APP}-cluster"
-DEF_DEPLOYMENT="${DEF_APP}-${DEF_VERSION}-deploy"
-DEF_SERVICE="${DEF_APP}-lb-service"
+DEF_ZONE="us-east1-b"                                       # zone / region
+DEF_VERSION="v1"                                            # Version tag
+DEF_APP="qndkubed"                                          # Main container app name
+DEF_CLUSTER="${DEF_APP}-cluster"                            # Cluster name
+DEF_DEPLOYMENT="${DEF_APP}-${DEF_VERSION}-deploy"           # Deployment name
+DEF_SERVICE="${DEF_APP}-lb-service"                         # Load-Balancing service
 
 #### Machine
-DEF_MACHINE="g1-small"
-DEF_HD_SIZE="10G"
+DEF_MACHINE="g1-small"                                      # Machine type
+DEF_HD_SIZE="10G"                                           # Hard disk size
 
 #### Load balancer
-DEF_EXT_PORT="80"
-DEF_INT_PORT="8080"         # Dependant on container image
+DEF_EXT_PORT="80"                                           # external conainer port
+DEF_INT_PORT="8080"                                         # container port, dependant on container image
 
 #### Scaling
-DEF_REPLICAS="3"            # Number of static replicas
-DEF_AUTOSCALE_OPTIONS=''    # Insert options to enable autoscale
-#DEF_AUTOSCALE_OPTIONS='--cpu-percent=80 --min=3 --max=6'  # example of autoscale options
+DEF_REPLICAS="3"                                            # Number of static replicas
+DEF_AUTOSCALE_OPTIONS=''                                    # Insert options to enable autoscale
+#DEF_AUTOSCALE_OPTIONS='--cpu-percent=80 --min=3 --max=6'    # Example of autoscale options
 
 #### Container
-DEF_CONTAINER_IMAGE='gcr.io/google-samples/hello-app:2.0'
+DEF_CONTAINER_IMAGE='gcr.io/google-samples/hello-app:2.0'   # Container
 
 #### Default Keycloak external port
-DEF_KC_EXT_PORT='8080'
+DEF_KC_EXT_PORT='8080'                                      # External Keycloak port
 
 #--------------
 ## ==> COMMANDS
@@ -150,7 +150,8 @@ print_variables (){
 print_kube_status () {
     echo -e "\n${STATUS_SCREEN_COLOR}====================================================="
     echo -e "${BLINK}STATUS:${STATUS_SCREEN_COLOR} $0 [-s or -S] ${WHITE}"
-    echo -e "${STATUS_SCREEN_COLOR}cluster: ${WARN}${DEF_CLUSTER}${WHITE}"
+    [ ! "${STATUS_CURRENT_CLUSTER_CHECK}" == "0" ] && \
+    echo -e "${STATUS_SCREEN_COLOR}cluster: ${WARN}$(kubectl cluster-info dump | grep -m 1 "cluster-name:" | awk '{print $13}' | sed 's/,//g')${WHITE}"
     [ ! "${1}" == "short" ] && GCIL="$(gcloud compute instances list | grep gke | head -n 16)"
     GCCL="$(gcloud container clusters list)"
 
@@ -210,6 +211,7 @@ usage () {
     echo "-V                                      # Show default variables"
     echo "-s                                      # Display Current Cluster Status"
     echo "-S                                      # Display Current Cluster Status, expanded"
+    echo "-F                                      # Fast install, skip status screens and curl check."
     echo
     echo -e "${STATUS}# Cluster:${WHITE}"
     echo "-c <cluster name>                       # Give a custom name to the cluster"
@@ -228,9 +230,9 @@ usage () {
     echo "-r <static replica number>              # Set custom static scaling, the number of replicas (pods)"
     echo "-A '--cpu-percent=80 --min=2 --max=6'   # Enable autoscale by inserting options"
     echo "-H                                      # Do not install Hello World Container"
-    echo
+    echo "-o                                      # Do not install check the app with curl"
     echo -e "${STATUS}# Keycloak container:${WHITE}"
-    echo "-K                                      # Install Keycloak container"
+    echo "-K                                      # Install Keycloak container (user: admin, password: admin)"
     echo "-k <external port>                      # Change default keycloak external-facing port (8080)"
     echo "-Y                                      # Generate Keycloak yaml files"
     echo "-W                                      # Generate Keycloak yaml files and show status only"
@@ -279,15 +281,17 @@ GET_CREDS_CLUSTER_NAME=''
 CLUSTER_CUSTOM_NAME=''
 CLUSTER_CREATION_BYPASS="0"
 CLUSTER_ONLY='0'
+INSTALL_HELLO_WORLD='1'
+CURL_CHECK_DEPLOYMENT='1'
 INSTALL_KEYCLOAK='0'
 GENERATE_KEYCLOAK_YAML='0'
-INSTALL_HELLO_WORLD='1'
 INSTALL_CUSTOM_YAML='0'
 CHECK_STATUS="1"
 GET_CREDENTIALS="1"
+STATUS_CURRENT_CLUSTER_CHECK='0'
 
 
-while getopts ":a:P:v:t:d:r:A:z:e:c:CZ:HKk:SshVYWy:" opt; do
+while getopts ":a:P:v:t:d:r:A:z:e:c:CZ:HoFg:Kk:SshVYWy:" opt; do
    case "${opt}" in
      a) DEF_APP=${OPTARG}
         DEF_CLUSTER="${DEF_APP}-cluster"
@@ -306,10 +310,13 @@ while getopts ":a:P:v:t:d:r:A:z:e:c:CZ:HKk:SshVYWy:" opt; do
      C) CLUSTER_ONLY='1';;
      Z) GET_CREDS_CLUSTER_NAME="${OPTARG}";;
      H) INSTALL_HELLO_WORLD='0';;
+     o) CURL_CHECK_DEPLOYMENT='0';;
+     F) CHECK_STATUS="0"; CURL_CHECK_DEPLOYMENT='0';;
+     g) DEF_CONTAINER_IMAGE="${OPTARG}";;
      K) INSTALL_KEYCLOAK='1';;
      k) DEF_KC_EXT_PORT=${OPTARG};;
-     S) print_kube_status ; exit 0;;
-     s) print_kube_status short; exit 0;;
+     S) STATUS_CURRENT_CLUSTER_CHECK='1'; print_kube_status ; exit 0;;
+     s) STATUS_CURRENT_CLUSTER_CHECK='1'; print_kube_status short; exit 0;;
      h) usage ; exit 0;;
      V) print_variables; exit 0;;
      Y) GENERATE_KEYCLOAK_YAML='1';;
@@ -327,6 +334,8 @@ DEF_KC_SERVICE="${DEF_KC_APP}-lb-service"
 # Cluster name overide
 # echo "CLUSTER_CUSTOM_NAME = ${CLUSTER_CUSTOM_NAME}" # Debug
 [ -n "${CLUSTER_CUSTOM_NAME}" ] && DEF_CLUSTER="${CLUSTER_CUSTOM_NAME}"
+
+# echo "DEF_CONTAINER_IMAGE = ${DEF_CONTAINER_IMAGE}" # debug
 
 #----------------------------------
 ## E) check VARIABLES before starting script.
@@ -360,7 +369,8 @@ if [[ ! "$(which kubectl)" ]] ; then
 fi
 
 # Check if project is configured
-if [ "$(gcloud config list --format 'value(core.project)')" == "" ]; then
+PROJECT_ID="$(gcloud config list --format='text(core.project)' | cut -d ' ' -f2)"
+if [ "${PROJECT_ID}" == "" ]; then
     echo -e "${ALERT}\nError: Please configure your project ID.${WHITE}"
     echo -e "${ALERT}gcloud config set project <project>${WHITE}"
     exit 2
@@ -398,8 +408,6 @@ deploy_hello_world (){
     echo -e "${COMMANDS_COLOR}#      --type=LoadBalancer --port ${DEF_EXT_PORT} --target-port ${DEF_INT_PORT}${WHITE}"
     kubectl expose deployment ${DEF_DEPLOYMENT} --name=${DEF_SERVICE} \
       --type=LoadBalancer --port "${DEF_EXT_PORT}" --target-port "${DEF_INT_PORT}"
-
-    echo -e "${BLINK}"'DONE!!! Waiting for website to respond...'"${WHITE}"
 }
 
 
@@ -451,7 +459,7 @@ curl_check_deployment (){
 
         ! (( (i + 1)  % 3 )) && echo -e "${BLINK}Press \"Ctrl-C\" to stop. ${WHITE}"
         [ "$pressed_ctrl_c" ] && echo && break   # exit loop before sleep
-        sleep 5
+        sleep 3
         [ "$pressed_ctrl_c" ] && echo && break   # exit loop after sleep
     done
 }
@@ -500,7 +508,7 @@ spec:
     spec:
       containers:
       - name: keycloak
-        image: quay.io/keycloak/keycloak:18.0.0
+        image: quay.io/keycloak/keycloak:latest
         args:
         - \"start-dev\"
         env:
@@ -545,8 +553,8 @@ spec:
 
 install_keycloak (){
   echo -e "${MESSAGE_BAR}-------------${WHITE}"
-  echo -e "Installing Keycloak....."
-  echo -e "${COMMANDS_COLOR}kubectl apply -f ${KEYCLOAK_APP_SERVICE_FILENAME}${WHITE}"
+  echo -e "${WARN}Installing Keycloak....."
+  echo -e "${COMMANDS_COLOR}# kubectl apply -f ${KEYCLOAK_APP_SERVICE_FILENAME}${WHITE}"
   load_keycloak_app_service
   cat <<EOF | kubectl apply -f -
 $KEYCLOAK_APP_SERVICE
@@ -564,7 +572,7 @@ EOF
   done
 
 
-  echo -e "${COMMANDS_COLOR}kubectl apply -f ${KEYCLOAK_INGRESS_FILENAME}${WHITE}"
+  echo -e "${COMMANDS_COLOR}# kubectl apply -f ${KEYCLOAK_INGRESS_FILENAME}${WHITE}"
   load_keycloak_ingress
   cat <<EOF | kubectl apply -f -
 $KEYCLOAK_INGRESS
@@ -598,6 +606,33 @@ keycloak_generate_yaml () {
 }
 #----------------------------------
 
+#----------------------------------
+# Store the cluster deletion commands in a variable:
+DELETE_CLUSTER_COMMANDS="echo -e \"\\e[0;31mScaling down and Deleting cluster ${DEF_CLUSTER}...${WHITE}\"
+
+echo -e \"${COMMANDS_COLOR}# gcloud container clusters get-credentials ${DEF_CLUSTER} --zone ${DEF_ZONE} --project ${PROJECT_ID}\\e[0m\"
+gcloud container clusters get-credentials ${DEF_CLUSTER} --zone ${DEF_ZONE} --project ${PROJECT_ID}
+[ \"\$?\" != \"0\" ] && echo -e \"${WARN}\"get-credentials\" command failed, \\nAre you in the correct project?${WHITE}\" && exit 3
+
+echo -e \"${COMMANDS_COLOR}# kubectl delete services ${DEF_SERVICE}${WHITE}\"
+kubectl delete services ${DEF_SERVICE}
+echo -e \"${COMMANDS_COLOR}# kubectl delete deployment ${DEF_DEPLOYMENT}${WHITE}\"
+kubectl delete deployment ${DEF_DEPLOYMENT}"
+
+# echo "INSTALL_KEYCLOAK ==== ${INSTALL_KEYCLOAK}" ## debug
+if [ "${INSTALL_KEYCLOAK}" == "1" ]; then
+#    echo -e "echo -e \"${COMMANDS_COLOR}# kubectl delete services ${DEF_KC_SERVICE}${WHITE}\"" >> ${DELETE_CLUSTER_COMMANDS}
+#    echo -e "kubectl delete services ${DEF_KC_SERVICE}" >> ${DELETE_CLUSTER_COMMANDS}
+#    echo -e "echo -e \"${COMMANDS_COLOR}# kubectl delete deployment ${DEF_KC_SERVICE}${WHITE}\"" >> ${DELETE_CLUSTER_COMMANDS}
+#    echo -e "kubectl delete deployment ${DEF_KC_APP}" >> ${DELETE_CLUSTER_COMMANDS}
+    DELETE_CLUSTER_COMMANDS="${DELETE_CLUSTER_COMMANDS}"$(echo -e "\necho -e \"${COMMANDS_COLOR}# kubectl delete services ${DEF_KC_SERVICE}${WHITE}\"")
+    DELETE_CLUSTER_COMMANDS="${DELETE_CLUSTER_COMMANDS}"$(echo -e "\nkubectl delete services ${DEF_KC_SERVICE}")
+    DELETE_CLUSTER_COMMANDS="${DELETE_CLUSTER_COMMANDS}"$(echo -e "\necho -e \"${COMMANDS_COLOR}# kubectl delete deployment ${DEF_KC_APP}${WHITE}\"")
+    DELETE_CLUSTER_COMMANDS="${DELETE_CLUSTER_COMMANDS}"$(echo -e "\nkubectl delete deployment ${DEF_KC_APP}")
+fi
+DELETE_CLUSTER_COMMANDS="${DELETE_CLUSTER_COMMANDS}"$(echo -e "\necho -e \"${COMMANDS_COLOR}# gcloud container clusters delete ${DEF_CLUSTER} --zone ${DEF_ZONE} --quiet${WHITE}\"")
+DELETE_CLUSTER_COMMANDS="${DELETE_CLUSTER_COMMANDS}"$(echo -e "\ntime gcloud container clusters delete ${DEF_CLUSTER} --zone ${DEF_ZONE} --quiet")
+#----------------------------------
 
 #----------------------------------
 OUTPUT_SCRIPT=''
@@ -617,18 +652,20 @@ create_deletion_script () {
     fi
 
     # Create deletion file
-    echo -e "# Cluster and deployment deletion script for ${DEF_CLUSTER}" >> ${OUTPUT_SCRIPT}
-    echo -e "# Created on $(date)\n" >> ${OUTPUT_SCRIPT}
-    echo -e "# To view project clusters:\n#  gcloud container clusters list" >> ${OUTPUT_SCRIPT}
-    echo -e "# To connect to this cluster:\n#  gcloud container clusters get-credentials ${DEF_CLUSTER} --zone ${DEF_ZONE}\n" >> ${OUTPUT_SCRIPT}
+    echo -e "## Cluster and deployment deletion script for ${DEF_CLUSTER}" >> ${OUTPUT_SCRIPT}
+    echo -e "## Created on $(date)\n" >> ${OUTPUT_SCRIPT}
+    echo -e "## To view project clusters:\n#  gcloud container clusters list" >> ${OUTPUT_SCRIPT}
+    echo -e "## To connect to this cluster:\n#  gcloud container clusters get-credentials ${DEF_CLUSTER} --zone ${DEF_ZONE} --project ${PROJECT_ID}\n" >> ${OUTPUT_SCRIPT}
     echo 'read -p "Delete Cluster '"${DEF_CLUSTER}"'? Y/n " choice' >> ${OUTPUT_SCRIPT}
     echo 'if [ "$choice" != "y"  ] && [ "$choice" != "Y"  ]; then exit 0; fi' >> ${OUTPUT_SCRIPT}
     echo -e "\n${DELETE_CLUSTER_COMMANDS}\n" >> ${OUTPUT_SCRIPT}
-    echo 'echo -e "Run \"rm '"${OUTPUT_SCRIPT}"'\" to erase this qnd_kubed deletion script."' >> ${OUTPUT_SCRIPT}
+    echo 'echo -e "Run \"${COMMANDS_COLOR}rm '"${OUTPUT_SCRIPT}"'\"${WHITE} to erase this qnd_kubed deletion script."' >> ${OUTPUT_SCRIPT}
 
     # Make file executable
     chmod u+x ${OUTPUT_SCRIPT}
 }
+
+
 #----------------------------------
 #######################################################################################
 #######################################################################################
@@ -681,8 +718,16 @@ fi
 ## Deploy
 
 ## 3) Deploy Hello World
-[ "${INSTALL_HELLO_WORLD}" == '1' ] && deploy_hello_world && print_kube_status short && curl_check_deployment || \
+#[ "${INSTALL_HELLO_WORLD}" == '1' ] && deploy_hello_world && print_kube_status short && curl_check_deployment || \
+#    LB_IP="$(kubectl get services | grep ${DEF_SERVICE} | awk '{ print $4 }')"
+if [ "${INSTALL_HELLO_WORLD}" == '1' ]; then
+    deploy_hello_world
+    [ "${CURL_CHECK_DEPLOYMENT}" == '1' ] && echo -e "${BLINK}"'DONE!!! Waiting for website to respond...'"${WHITE}"
+    [ "${CHECK_STATUS}" == '1' ] && print_kube_status short
+    [ "${CURL_CHECK_DEPLOYMENT}" == '1' ] && curl_check_deployment
+else
     LB_IP="$(kubectl get services | grep ${DEF_SERVICE} | awk '{ print $4 }')"
+fi
 # Add information to message function
 INGRESS_MESSAGE="\n# To connect to ${DEF_APP} app:\n${COMMANDS_COLOR}http://${LB_IP}:${DEF_EXT_PORT}${WHITE}"
 
@@ -706,7 +751,7 @@ fi
 [ "${GENERATE_KEYCLOAK_YAML}" == '1' ] && keycloak_generate_yaml
 # Exit if there are no deployments.
 [ "${GENERATE_KEYCLOAK_YAML_ONLY}" == '1' ] && exit 0;
-print_kube_status
+[ "${CHECK_STATUS}" == '1' ] && print_kube_status
 #----------------------------------
 
 
@@ -717,16 +762,6 @@ print_kube_status
 ## Answering "q" or "Q" quits the program.
 ## Answering anything else creates an executable script to quickly
 ##    delete the cluster at a later time.
-
-# Store the cluster deletion commands in a variable:
-DELETE_CLUSTER_COMMANDS="echo -e \"\\e[0;31mDeleting cluster ${DEF_CLUSTER} ...\\e[0m \"
-kubectl delete services ${DEF_SERVICE}
-kubectl delete deployment ${DEF_DEPLOYMENT}"
-if [ "${INSTALL_KEYCLOAK}" == "1" ]; then
-    DELETE_CLUSTER_COMMANDS="${DELETE_CLUSTER_COMMANDS}"$(echo -e "\nkubectl delete services ${DEF_KC_SERVICE}")
-    DELETE_CLUSTER_COMMANDS="${DELETE_CLUSTER_COMMANDS}"$(echo -e "\nkubectl delete deployment ${DEF_KC_APP}")
-fi
-DELETE_CLUSTER_COMMANDS="${DELETE_CLUSTER_COMMANDS}"$(echo -e "\ntime gcloud container clusters delete ${DEF_CLUSTER} --zone ${DEF_ZONE} --quiet")
 
 # debug: Print cluster commands
 #echo -e "#----------------------------------"
