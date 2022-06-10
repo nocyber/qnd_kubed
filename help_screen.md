@@ -7,6 +7,7 @@
 -V                                      # Show default variables
 -s                                      # Display Current Cluster Status
 -S                                      # Display Current Cluster Status, expanded
+-F                                      # Fast install, skip status screens and curl check.
 
 # Cluster:
 -c <cluster name>                       # Give a custom name to the cluster
@@ -25,6 +26,7 @@
 -r <static replica number>              # Set custom static scaling, the number of replicas (pods)
 -A '--cpu-percent=80 --min=2 --max=6'   # Enable autoscale by inserting options
 -H                                      # Do not install Hello World Container
+-o                                      # Do not install check the app with curl
 
 # Keycloak container:
 -K                                      # Install Keycloak container (user: admin, password: admin)
@@ -35,7 +37,6 @@
 
 # Deploy custom yaml file:
 -y <yaml file>                          # deploy custom yaml file, do not deploy Hello World
-
 ```
 
 ## EXAMPLES:
