@@ -29,8 +29,8 @@ chmod +x ./qnd_kubed
 ```
 ./qnd_kubed                     # execute with defaults.
 ./qnd_kubed -a "teacup" -K      # name the app[-a] "teacup", install Keycloak[-K]
+                                # ( Keycloak user: admin, password: admin)
 ```
-***( Keycloak user: admin, password: admin)***
 
 ```
 ./qnd_kubed -h                 # Help screen and examples
@@ -38,6 +38,7 @@ chmod +x ./qnd_kubed
 ./qnd_kubed -s                 # Show status
 ./qnd_kubed -S                 # Show status (expanded)
 ```
+Check the [help page](help_screen.md), or `./qnd_kubed -h` for more options.
 
 ## Notes
 
