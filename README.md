@@ -1,7 +1,7 @@
 # Quick 'n Dirty: Kubed
 
 #### qnd_kubed quickly sets up Kubernetes clusters for testing, research and learning purposes.
-The script originally was part of a series of [manual lists of commands](Original_QnD_Kubed.md) made to copy into the shell. It was designed to be quick, but polluted the shell history with excessive commenting.
+The script originally was part of a series of [manual lists of commands](qnd_kubed_commands.md) made to copy into the shell. It was designed to be quick, but polluted the shell history with excessive commenting.
 
 qnd_kubed without any options will:
   1. create a zonal cluster (and tell you the duration of time it took).
