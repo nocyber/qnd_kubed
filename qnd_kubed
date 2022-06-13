@@ -71,25 +71,21 @@ DEF_KC_EXT_PORT='8080'                                      # External Keycloak 
 ## ==> COMMANDS
 ##           TLDR; This script is based on the following commands:
 
-#### 1) Enable API
+#### 1-6) Create services
 # gcloud services enable container.googleapis.com
-
-#### 2-3) Create cluster, get credentials, if necessary.
 # gcloud container clusters create "${DEF_CLUSTER}" --machine-type ${DEF_MACHINE} --disk-size ${DEF_HD_SIZE} --zone ${DEF_ZONE}
 # gcloud container clusters get-credentials ${DEF_CLUSTER} --zone ${DEF_ZONE}
-
-#### 4-6) Create & scale deployment, create load balancer.
 # kubectl create deployment ${DEF_DEPLOYMENTMENT} --image ${DEF_CONTAINER_IMAGE}
 # kubectl scale deployment ${DEF_DEPLOYMENT} --replicas ${DEF_REPLICAS}
 # kubectl expose deployment ${DEF_DEPLOYMENT} --name=${DEF_SERVICE} \
 #    --type=LoadBalancer --port "${DEF_EXT_PORT}" --target-port "${DEF_INT_PORT}"
 
-#### 7-9) Check Hello World app on Kubernetes cluster
+#### 7-9) Check services
 # kubectl get services
 # LB_IP=$(kubectl get services | grep "${DEF_SERVICE}" | awk '{ print $4 }') # Fetch IP
 # curl -m1 http://${LB_IP}:${DEF_EXT_PORT}               # curl with a 1 second timeout
 
-#### Delete Kubernetes cluster
+#### Delete services
 # kubectl delete services ${DEF_SERVICE}
 # kubectl scale deployment ${DEF_DEPLOYMENT} --replicas=0
 # kubectl delete deployment ${DEF_DEPLOYMENT}
@@ -211,6 +207,7 @@ usage () {
     echo "-V                                      # Show default variables"
     echo "-s                                      # Display Current Cluster Status"
     echo "-S                                      # Display Current Cluster Status, expanded"
+    echo "-f                                      # fast: Do not check the app with curl"
     echo "-F                                      # Fast install, skip status screens and curl check."
     echo
     echo -e "${STATUS}# Cluster:${WHITE}"
@@ -230,7 +227,7 @@ usage () {
     echo "-r <static replica number>              # Set custom static scaling, the number of replicas (pods)"
     echo "-A '--cpu-percent=80 --min=2 --max=6'   # Enable autoscale by inserting options"
     echo "-H                                      # Do not install Hello World Container"
-    echo "-o                                      # Do not install check the app with curl"
+    echo
     echo -e "${STATUS}# Keycloak container:${WHITE}"
     echo "-K                                      # Install Keycloak container (user: admin, password: admin)"
     echo "-k <external port>                      # Change default keycloak external-facing port (8080)"
@@ -291,7 +288,7 @@ GET_CREDENTIALS="1"
 STATUS_CURRENT_CLUSTER_CHECK='0'
 
 
-while getopts ":a:P:v:t:d:r:A:z:e:c:CZ:HoFg:Kk:SshVYWy:" opt; do
+while getopts ":a:P:v:t:d:r:A:z:e:c:CZ:HfFg:Kk:SshVYWy:" opt; do
    case "${opt}" in
      a) DEF_APP=${OPTARG}
         DEF_CLUSTER="${DEF_APP}-cluster"
@@ -310,7 +307,7 @@ while getopts ":a:P:v:t:d:r:A:z:e:c:CZ:HoFg:Kk:SshVYWy:" opt; do
      C) CLUSTER_ONLY='1';;
      Z) GET_CREDS_CLUSTER_NAME="${OPTARG}";;
      H) INSTALL_HELLO_WORLD='0';;
-     o) CURL_CHECK_DEPLOYMENT='0';;
+     f) CURL_CHECK_DEPLOYMENT='0';;
      F) CHECK_STATUS="0"; CURL_CHECK_DEPLOYMENT='0';;
      g) DEF_CONTAINER_IMAGE="${OPTARG}";;
      K) INSTALL_KEYCLOAK='1';;
@@ -332,11 +329,11 @@ shift $((OPTIND -1))
 DEF_KC_APP="${DEF_APP}-keycloak"
 DEF_KC_SERVICE="${DEF_KC_APP}-lb-service"
 # Cluster name overide
-# echo "CLUSTER_CUSTOM_NAME = ${CLUSTER_CUSTOM_NAME}" # Debug
+
 [ -n "${CLUSTER_CUSTOM_NAME}" ] && DEF_CLUSTER="${CLUSTER_CUSTOM_NAME}"
 
 # echo "DEF_CONTAINER_IMAGE = ${DEF_CONTAINER_IMAGE}" # debug
-
+echo "CLUSTER_CUSTOM_NAME = ${CLUSTER_CUSTOM_NAME}" # Debug
 #----------------------------------
 ## E) check VARIABLES before starting script.
 
@@ -351,7 +348,7 @@ fi
 [[ -z "GET_CREDS_CLUSTER_NAME" ]] && gcloud container clusters get-credentials ${DEF_CLUSTER} --zone ${DEF_ZONE} && message && exit 0
 
 # Check for existing clustername and exit if it already exists.
-if [[ "${CLUSTER_CREATION_BYPASS}" == "0" ]] && [[ -n "$(gcloud container clusters list | grep -v NAME | awk '{ print $1 }' | grep ${DEF_CLUSTER})" ]]; then
+if [[ "${CLUSTER_CREATION_BYPASS}" == "0" ]] && [[ -n "$(gcloud container clusters list | grep -v NAME | awk '{ print $1 }' | grep -w ${DEF_CLUSTER})" ]]; then
   echo -e "${WARN}"
   read -p "Clustername already exists. Deploy onto existing cluster? (Y/n): " choice
   echo -e "${WHITE}"
@@ -404,7 +401,7 @@ deploy_hello_world (){
         kubectl scale deployment ${DEF_DEPLOYMENT} --replicas=${DEF_REPLICAS}
     fi
     ## 5) make it accessible
-    echo -e "${COMMANDS_COLOR}# 6) kubectl expose deployment ${DEF_DEPLOYMENT} --name=${DEF_SERVICE}"' \'"${WHITE}"
+    echo -e "${COMMANDS_COLOR}# 6) kubectl expose deployment ${DEF_DEPLOYMENT} --name=${DEF_SERVICE} "'\'
     echo -e "${COMMANDS_COLOR}#      --type=LoadBalancer --port ${DEF_EXT_PORT} --target-port ${DEF_INT_PORT}${WHITE}"
     kubectl expose deployment ${DEF_DEPLOYMENT} --name=${DEF_SERVICE} \
       --type=LoadBalancer --port "${DEF_EXT_PORT}" --target-port "${DEF_INT_PORT}"
@@ -659,7 +656,7 @@ create_deletion_script () {
     echo 'read -p "Delete Cluster '"${DEF_CLUSTER}"'? Y/n " choice' >> ${OUTPUT_SCRIPT}
     echo 'if [ "$choice" != "y"  ] && [ "$choice" != "Y"  ]; then exit 0; fi' >> ${OUTPUT_SCRIPT}
     echo -e "\n${DELETE_CLUSTER_COMMANDS}\n" >> ${OUTPUT_SCRIPT}
-    echo 'echo -e "Run \"${COMMANDS_COLOR}rm '"${OUTPUT_SCRIPT}"'\"${WHITE} to erase this qnd_kubed deletion script."' >> ${OUTPUT_SCRIPT}
+    echo 'echo -e "Run \" '"${COMMANDS_COLOR}rm ${OUTPUT_SCRIPT}"'\"'" ${WHITE}"'to erase this qnd_kubed deletion script."' >> ${OUTPUT_SCRIPT}
 
     # Make file executable
     chmod u+x ${OUTPUT_SCRIPT}
@@ -687,9 +684,10 @@ if [ "${CLUSTER_CREATION_BYPASS}" == "0" ]; then
         echo -e "${INFO}Container API already enabled.${WHITE}"
 
   # Create cluster
-    echo -e "${COMMANDS_COLOR}# 2) gcloud container clusters create ${DEF_CLUSTER} --machine-type ${DEF_MACHINE} --disk-size ${DEF_HD_SIZE} --zone ${DEF_ZONE}${WHITE}"
+    echo -e "${COMMANDS_COLOR}# 2) gcloud container clusters create ${DEF_CLUSTER} --machine-type ${DEF_MACHINE} --disk-size ${DEF_HD_SIZE} --zone ${DEF_ZONE}${WHITE} --enable-network-policy"
     time gcloud container clusters create "${DEF_CLUSTER}" --machine-type ${DEF_MACHINE} \
-        --disk-size ${DEF_HD_SIZE} --zone ${DEF_ZONE} --enable-autoscaling --min-nodes 1 --max-nodes 8
+        --disk-size ${DEF_HD_SIZE} --zone ${DEF_ZONE} --enable-autoscaling --min-nodes 1 --max-nodes 8 \
+        --enable-network-policy
 
     # Exit if previous command fails.
     if [ "$?" != "0" ]; then
@@ -723,7 +721,7 @@ fi
 if [ "${INSTALL_HELLO_WORLD}" == '1' ]; then
     deploy_hello_world
     [ "${CURL_CHECK_DEPLOYMENT}" == '1' ] && echo -e "${BLINK}"'DONE!!! Waiting for website to respond...'"${WHITE}"
-    [ "${CHECK_STATUS}" == '1' ] && print_kube_status short
+    [ "${CURL_CHECK_DEPLOYMENT}" == '1' ] &&  print_kube_status short
     [ "${CURL_CHECK_DEPLOYMENT}" == '1' ] && curl_check_deployment
 else
     LB_IP="$(kubectl get services | grep ${DEF_SERVICE} | awk '{ print $4 }')"
